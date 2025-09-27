@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Admin Settings{% endblock %}
+{% block content %}
+<div class="settings-container animate">
+  <div class="settings-card">
+    <h2>⚙ Admin Account</h2>
+    <p class="muted">Change your login username and/or password.</p>
+
+    <form method="post" class="settings-form">
+      <!-- Current Password -->
+      <div class="form-group full-width">
+        <label>🔑 Current Password</label>
+        <input type="password" name="current_password" placeholder="Enter current password" required>
+      </div>
+
+      <!-- New Username -->
+      <div class="form-group">
+        <label>👤 New Username <span class="muted">(optional)</span></label>
+        <input name="new_username" placeholder="Leave blank to keep '{{ username }}'">
+      </div>
+
+      <!-- New Password -->
+      <div class="form-group">
+        <label>🔒 New Password <span class="muted">(optional)</span></label>
+        <input type="password" id="newPassword" name="new_password" placeholder="Leave blank to keep current password">
+        <div id="strengthBar"><div></div></div>
+        <small id="strengthText" class="muted"></small>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn pulse full-btn">💾 Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Password Strength Indicator
+  const passwordInput = document.getElementById("newPassword");
+  const strengthBar = document.getElementById("strengthBar").firstElementChild;
+  const strengthText = document.getElementById("strengthText");
+
+  passwordInput.addEventListener("input", () => {
+    const val = passwordInput.value;
+    let strength = 0;
+
+    if (val.length >= 6) strength++;
+    if (/[A-Z]/.test(val)) strength++;
+    if (/[0-9]/.test(val)) strength++;
+    if (/[@$!%*?&#]/.test(val)) strength++;
+
+    const levels = ["Weak", "Fair", "Good", "Strong"];
+    const colors = ["#ef4444", "#f59e0b", "#3b82f6", "#10b981"];
+
+    strengthBar.style.width = (strength * 25) + "%";
+    strengthBar.style.background = colors[strength - 1] || "#d1d5db";
+    strengthText.textContent = val ? levels[strength - 1] : "";
+    strengthText.style.color = colors[strength - 1] || "#6b7280";
+  });
+</script>
+{% endblock %}

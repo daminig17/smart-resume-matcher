@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Resume Matcher{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+  <a href="{{ url_for('index') }}"> Home</a>
+  <a href="{{ url_for('upload') }}"> Upload Resume</a>
+  
+</nav>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-container">
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+
+<script>
+  function confirmLogout() {
+    return confirm("Are you sure you want to logout?");
+  }
+</script>
+
+
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Main Wrapper -->
+  <div class="main">
+    <div class="content animate">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+
+  <!-- Back to Top -->
+  <button onclick="scrollToTop()" id="backToTop">⬆</button>
+  <script>
+    const btn = document.getElementById("backToTop");
+    window.onscroll = function() {
+      btn.style.display = (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) ? "block" : "none";
+    };
+    function scrollToTop() { window.scrollTo({ top: 0, behavior: "smooth" }); }
+  </script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<div class="container animate">
+  <h2>📂 Admin Dashboard</h2>
+
+  <!-- Search & Filter -->
+  <div class="card search-filter">
+    <input type="text" id="searchInput" placeholder="🔍 Search by filename...">
+    <select id="statusFilter">
+      <option value="all">All Status</option>
+      <option value="pending">Pending</option>
+      <option value="selected">Selected</option>
+    </select>
+  </div>
+
+  <!-- Export -->
+  <div class="card">
+    <h3>📊 Resume Distribution by IT Sector</h3>
+    <div style="margin-bottom: 15px;">
+      <a href="{{ url_for('download_pdf') }}" class="btn pulse">📥 PDF</a>
+      <a href="{{ url_for('download_excel') }}" class="btn pulse">📥 Excel</a>
+    </div>
+    <canvas id="sectorChart"></canvas>
+    <script>
+      const ctx = document.getElementById('sectorChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: [{% for section in sections.keys() %}"{{ section }}",{% endfor %}],
+          datasets: [{
+            data: [{% for section, resumes in sections.items() %}{{ resumes|length }},{% endfor %}],
+            backgroundColor: ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6']
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+      });
+    </script>
+  </div>
+
+  <!-- Resumes -->
+  {% for section, resumes_list in sections.items() %}
+    <div class="card">
+      <h3>{{ section }}</h3>
+      {% if resumes_list %}
+        <div class="resume-grid">
+          {% for id, f, sc, status in resumes_list %}
+            <div class="resume-card" data-filename="{{ f|lower }}" data-status="{{ status }}">
+              <p class="resume-file">📄 {{ f }}</p>
+              <p class="resume-score">Confidence: {{ (sc*100)|round(0) }}%</p>
+              <span class="status-badge {{ status }}">{{ status|capitalize }}</span>
+              <div class="actions">
+                <a href="{{ url_for('download_resume', filename=f) }}" class="btn small pulse">⬇ Download</a>
+                {% if status != "selected" %}
+                  <a href="{{ url_for('select_resume', resume_id=id) }}" class="btn small pulse">✅ Select</a>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p>No resumes yet</p>
+      {% endif %}
+    </div>
+  {% endfor %}
+</div>
+
+<!-- Filter Script -->
+<script>
+  const searchInput = document.getElementById("searchInput");
+  const statusFilter = document.getElementById("statusFilter");
+  const resumeCards = document.querySelectorAll(".resume-card");
+
+  function filterResumes() {
+    const query = searchInput.value.toLowerCase();
+    const status = statusFilter.value;
+    resumeCards.forEach(card => {
+      const filename = card.dataset.filename;
+      const cardStatus = card.dataset.status;
+      card.style.display =
+        (filename.includes(query) && (status === "all" || status === cardStatus))
+        ? "block" : "none";
+    });
+  }
+  searchInput.addEventListener("input", filterResumes);
+  statusFilter.addEventListener("change", filterResumes);
+</script>
+{% endblock %}

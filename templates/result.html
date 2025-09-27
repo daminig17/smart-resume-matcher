@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Result{% endblock %}
+{% block content %}
+<div class="container card animate">
+  {% if matched %}
+    <h2>✅ Matched!</h2>
+    <p>Your resume is forwarded to <b>{{ section }}</b> team.</p>
+    <p>Confidence Score: <b>{{ (score * 100)|round(0) }}%</b></p>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar">
+      <div class="progress" style="width: {{ (score * 100)|round(0) }}%"></div>
+    </div>
+
+    <!-- Skills Grid -->
+    <div class="skills-grid">
+      <div>
+        <h3 class="section-title">✔ Matched Skills</h3>
+        <div class="skills-list matched">
+          {% for s in matched_skills %}
+            <span class="skill-badge">{{ s }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      <div>
+        <h3 class="section-title">❌ Missing Skills</h3>
+        <div class="skills-list missing">
+          {% for s in missing_skills %}
+            <span class="skill-badge">{{ s }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <canvas id="skillsChart" width="400" height="200"></canvas>
+    <script>
+      const ctx = document.getElementById('skillsChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Matched Skills', 'Missing Skills'],
+          datasets: [{
+            label: 'Skills Count',
+            data: [{{ matched_skills|length if matched_skills else 0 }},
+                   {{ missing_skills|length if missing_skills else 0 }}],
+            backgroundColor: ['#10b981', '#ef4444']
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    </script>
+  {% else %}
+    <h2>❌ Not Matched</h2>
+    <p>Sorry, your skills don’t match. Suggestions:</p>
+    <ul>
+      {% for s in suggestions %}
+        <li>{{ s }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  <a href="{{ url_for('index') }}" class="btn pulse">⬅ Back to Home</a>
+</div>
+{% endblock %}
